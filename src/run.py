@@ -158,11 +158,11 @@ elif args.function == 'finetune':
                         num_workers=4)
 
     # finetune
-    trainer = trainer.Trainer(model, finetune_dataset, None, tconf)
+    trainer = trainer.Trainer(gpt_model, finetune_dataset, None, tconf)
     trainer.train()
 
     # save the resulting model
-    torch.save(model.state_dict, args.writing_params_path)
+    torch.save(gpt_model.state_dict, args.writing_params_path)
 
 
 elif args.function == 'evaluate':
