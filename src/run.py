@@ -90,6 +90,8 @@ if args.variant == 'vanilla':
 # From here on, your code should be identical independent of which
 # variant (vanilla or synthesizer) has been chosen.
 
+print('here!!!1')
+
 if args.function == 'pretrain':
     assert args.pretrain_corpus_path is not None
     assert args.writing_params_path is not None
@@ -146,23 +148,27 @@ elif args.function == 'finetune':
     text = open(args.finetune_corpus_path).read()
     finetune_dataset = dataset.NameDataset(pretrain_dataset, text)
 
+    print('here!!!')
+
     # load parameters if specified, create config if parameters not specified
     if args.reading_params_path is not None:
+        print('Reading params is not None')
         gpt_model.load_state_dict(torch.load(args.reading_params_path))
         tconf = trainer.TrainerConfig(max_epochs=10, batch_size=256, learning_rate=6e-4,
                         lr_decay=True, warmup_tokens=512*20, final_tokens=200*len(pretrain_dataset)*block_size,
-                        num_workers=4)
+                        num_workers=2)
     else:
         tconf = trainer.TrainerConfig(max_epochs=75, batch_size=256, learning_rate=6e-4,
                         lr_decay=True, warmup_tokens=512*20, final_tokens=200*len(pretrain_dataset)*block_size,
-                        num_workers=4)
+                        num_workers=2)
 
     # finetune
     trainer = trainer.Trainer(gpt_model, finetune_dataset, None, tconf)
     trainer.train()
 
     # save the resulting model
-    torch.save(gpt_model.state_dict, args.writing_params_path)
+    print('Saving')
+    torch.save(gpt_model.state_dict(), args.writing_params_path)
 
 
 elif args.function == 'evaluate':
