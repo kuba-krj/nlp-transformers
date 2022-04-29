@@ -177,7 +177,7 @@ elif args.function == 'finetune':
     torch.save(gpt_model.state_dict(), args.writing_params_path)
 
 
-elif args.function == 'evaluate':
+elif args.function == 'evaluate': 
     print('again here')
     assert args.outputs_path is not None
     assert args.reading_params_path is not None

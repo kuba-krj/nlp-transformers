@@ -7,7 +7,6 @@ import torch
 from torch.utils.data import Dataset
 import argparse
 import numpy as np
-import math
 
 """
 The input-output pairs (x, y) of the NameDataset are of the following form:
