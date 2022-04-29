@@ -175,7 +175,7 @@ class CharCorruptionDataset(Dataset):
         # TODO [part e]: see detailed specification above.
         document = self.data[idx]
         truncate_len = random.randint(4, int(self.block_size*7/8))
-        document = document[:truncate_len]
+        document = str(document[:truncate_len])
         # choose length of mask
         mask_len = random.randint(1, int(truncate_len/2 - 1))
         # divide for three parts
@@ -185,14 +185,14 @@ class CharCorruptionDataset(Dataset):
         suffix = document[(prefix_len + mask_len):]
         # prepare masked string
         pad_len = self.block_size - truncate_len - 2
-        pads = [self.PAD_CHAR] * pad_len
+        pads = self.PAD_CHAR * pad_len
         masked_string = prefix + self.MASK_CHAR + suffix + self.MASK_CHAR + masked_content + pads
         # constuct input and output
         input = masked_string[:-1]
         output = masked_string[1:]
         # translate using vocabulary and return values
         x = [self.stoi[s] for s in input]
-        y = [self.itos[s] for s in output]
+        y = [self.stoi[s] for s in output]
         return x, y
 
 """
