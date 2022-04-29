@@ -173,7 +173,7 @@ class CharCorruptionDataset(Dataset):
     def __getitem__(self, idx):
         # TODO [part e]: see detailed specification above.
         document = self.data[idx]
-        truncate_len = random.randint(4, int(self.block_size*7/8))
+        truncate_len = random.randint(4, min(int(self.block_size*7/8), len(document)))
         document = str(document[:truncate_len])
         # choose length of mask
         mask_len = random.randint(1, int(truncate_len/2 - 1))
@@ -181,17 +181,28 @@ class CharCorruptionDataset(Dataset):
         prefix_len = int((truncate_len - mask_len) / 2)
         prefix = document[:prefix_len]
         masked_content = document[prefix_len:(prefix_len + mask_len)]
+        # print(f"real length of document: {len(document)}")
+        # print(f"prefix_len+mask_len: {prefix_len + mask_len}")
         suffix = document[(prefix_len + mask_len):]
         # prepare masked string
         pad_len = self.block_size - truncate_len - 2
+        # print(f"mask len: {mask_len}")
+        # print(f"block_size: {self.block_size}")
+        # print(f"pad_len: {pad_len}")
+        # print(f"truncate_len: {truncate_len}")
+        # print(f"prefix_len: {prefix_len}")
+        # print(f"real prefix length: {len(prefix)}")
+        # print(f"real suffix length: {len(suffix)}")
+        # print(f"real masked content length: {len(masked_content)}")
         pads = self.PAD_CHAR * pad_len
         masked_string = prefix + self.MASK_CHAR + suffix + self.MASK_CHAR + masked_content + pads
+        # print(f"real len of masked string: {len(masked_string)}")
         # constuct input and output
         input = masked_string[:-1]
         output = masked_string[1:]
         # translate using vocabulary and return values
-        x = [self.stoi[s] for s in input]
-        y = [self.stoi[s] for s in output]
+        x = torch.tensor([self.stoi[s] for s in input], dtype=torch.long)
+        y = torch.tensor([self.stoi[s] for s in output], dtype=torch.long)
         return x, y
 
 """
@@ -218,8 +229,10 @@ if __name__ == '__main__':
         pass
     elif args.dataset_type == 'charcorruption':
         corruption_dataset = CharCorruptionDataset(open('wiki.txt').read(), 128) 
-        for _, example in zip(range(10), corruption_dataset):
+        for _, example in zip(range(30), corruption_dataset):
             x, y = example
+            # print(x.shape)
+            # print(y.shape)
             print('x:', ''.join([corruption_dataset.itos[int(c)] for c in x]))
             print('y:', ''.join([corruption_dataset.itos[int(c)] for c in y]))
     else:
