@@ -7,6 +7,7 @@ import torch
 from torch.utils.data import Dataset
 import argparse
 import numpy as np
+import math
 
 """
 The input-output pairs (x, y) of the NameDataset are of the following form:
@@ -172,7 +173,26 @@ class CharCorruptionDataset(Dataset):
 
     def __getitem__(self, idx):
         # TODO [part e]: see detailed specification above.
-
+        document = self.data[idx]
+        truncate_len = random.randint(4, int(self.block_size*7/8))
+        document = document[:truncate_len]
+        # choose length of mask
+        mask_len = random.randint(1, int(truncate_len/2 - 1))
+        # divide for three parts
+        prefix_len = int((truncate_len - mask_len) / 2)
+        prefix = document[:prefix_len]
+        masked_content = document[prefix_len:(prefix_len + mask_len)]
+        suffix = document[(prefix_len + mask_len):]
+        # prepare masked string
+        pad_len = self.block_size - truncate_len - 2
+        pads = [self.PAD_CHAR] * pad_len
+        masked_string = prefix + self.MASK_CHAR + suffix + self.MASK_CHAR + masked_content + pads
+        # constuct input and output
+        input = masked_string[:-1]
+        output = masked_string[1:]
+        # translate using vocabulary and return values
+        x = [self.stoi[s] for s in input]
+        y = [self.itos[s] for s in output]
         return x, y
 
 """
