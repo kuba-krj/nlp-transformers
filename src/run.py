@@ -161,7 +161,7 @@ elif args.function == 'finetune':
     # load parameters if specified, create config if parameters not specified
     if args.reading_params_path is not None:
         gpt_model.load_state_dict(torch.load(args.reading_params_path))
-        tconf = trainer.TrainerConfig(max_epochs=10, batch_size=256, learning_rate=6e-4,
+        tconf = trainer.TrainerConfig(max_epochs=30, batch_size=256, learning_rate=6e-4,
                         lr_decay=True, warmup_tokens=512*20, final_tokens=200*len(pretrain_dataset)*block_size,
                         num_workers=2)
     else:
@@ -178,7 +178,7 @@ elif args.function == 'finetune':
 
 
 elif args.function == 'evaluate': 
-    print('again here')
+    # print('again here')
     assert args.outputs_path is not None
     assert args.reading_params_path is not None
     assert args.eval_corpus_path is not None
@@ -195,12 +195,12 @@ elif args.function == 'evaluate':
             x = x + '⁇'
             x = torch.tensor([pretrain_dataset.stoi[s] for s in x], dtype=torch.long)[None, ...].to(device)
             pred = utils.sample(gpt_model, x, 32, sample=False)[0]
-            print(pred)
+            # print(pred)
             completion = ''.join([pretrain_dataset.itos[int(i)] for i in pred])
             pred = completion.split('⁇')[1]
             predictions.append(pred)
             fout.write(pred + '\n')
-        print(predictions)
+        # print(predictions)
         total, correct = evaluate_places(args.eval_corpus_path, predictions)
     if total > 0:
         print('Correct: {} out of {}: {}%'.format(correct, total, correct/total*100))

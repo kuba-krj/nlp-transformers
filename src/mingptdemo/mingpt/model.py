@@ -28,7 +28,7 @@ class GPTConfig:
         self.block_size = block_size
         for k,v in kwargs.items():
             setattr(self, k, v)
-
+ 
 
 class GPT1Config(GPTConfig):
     """ GPT-1 like network roughly 125M params """

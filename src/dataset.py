@@ -173,19 +173,26 @@ class CharCorruptionDataset(Dataset):
     def __getitem__(self, idx):
         # TODO [part e]: see detailed specification above.
         document = self.data[idx]
-        truncate_len = random.randint(4, min(int(self.block_size*7/8), len(document)))
-        document = str(document[:truncate_len])
-        # choose length of mask
-        mask_len = random.randint(1, int(truncate_len/2 - 1))
-        # divide for three parts
-        prefix_len = int((truncate_len - mask_len) / 2)
-        prefix = document[:prefix_len]
-        masked_content = document[prefix_len:(prefix_len + mask_len)]
-        # print(f"real length of document: {len(document)}")
-        # print(f"prefix_len+mask_len: {prefix_len + mask_len}")
-        suffix = document[(prefix_len + mask_len):]
+        # print(f"index: {idx}")
+        if len(document) == 0:
+            pad_len = self.block_size - 6
+            pads = self.PAD_CHAR * pad_len
+            input = output = ' ' + self.MASK_CHAR + ' ' + self.MASK_CHAR + ' ' + pads
+        else:
+            truncate_len = random.randint(4, min(int(self.block_size*7/8), len(document)))
+            document = str(document[:truncate_len])
+            # choose length of mask
+            mask_len_add = random.choice([-1, 0, 1])
+            mask_len = int(truncate_len/2) + mask_len_add
+            # divide for three parts
+            prefix_len = int((truncate_len - mask_len) / 2)
+            prefix = document[:prefix_len]
+            masked_content = document[prefix_len:(prefix_len + mask_len)]
+            # print(f"real length of document: {len(document)}")
+            # print(f"prefix_len+mask_len: {prefix_len + mask_len}")
+            suffix = document[(prefix_len + mask_len):]
         # prepare masked string
-        pad_len = self.block_size - truncate_len - 2
+            pad_len = self.block_size - truncate_len - 2
         # print(f"mask len: {mask_len}")
         # print(f"block_size: {self.block_size}")
         # print(f"pad_len: {pad_len}")
@@ -194,12 +201,12 @@ class CharCorruptionDataset(Dataset):
         # print(f"real prefix length: {len(prefix)}")
         # print(f"real suffix length: {len(suffix)}")
         # print(f"real masked content length: {len(masked_content)}")
-        pads = self.PAD_CHAR * pad_len
-        masked_string = prefix + self.MASK_CHAR + suffix + self.MASK_CHAR + masked_content + pads
+            pads = self.PAD_CHAR * pad_len
+            masked_string = prefix + self.MASK_CHAR + suffix + self.MASK_CHAR + masked_content + pads
         # print(f"real len of masked string: {len(masked_string)}")
         # constuct input and output
-        input = masked_string[:-1]
-        output = masked_string[1:]
+            input = masked_string[:-1]
+            output = masked_string[1:]
         # translate using vocabulary and return values
         x = torch.tensor([self.stoi[s] for s in input], dtype=torch.long)
         y = torch.tensor([self.stoi[s] for s in output], dtype=torch.long)
