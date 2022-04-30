@@ -173,7 +173,6 @@ class CharCorruptionDataset(Dataset):
     def __getitem__(self, idx):
         # TODO [part e]: see detailed specification above.
         document = self.data[idx]
-        # print(f"index: {idx}")
         if len(document) == 0:
             pad_len = self.block_size - 6
             pads = self.PAD_CHAR * pad_len
@@ -181,29 +180,16 @@ class CharCorruptionDataset(Dataset):
         else:
             truncate_len = random.randint(4, min(int(self.block_size*7/8), len(document)))
             document = str(document[:truncate_len])
-            # choose length of mask
-            mask_len_add = random.choice([-1, 0, 1])
-            mask_len = int(truncate_len/2) + mask_len_add
+            mask_len = int(round(np.random.uniform(low=truncate_len/8, high=3*truncate_len/8)))
             # divide for three parts
             prefix_len = int((truncate_len - mask_len) / 2)
             prefix = document[:prefix_len]
             masked_content = document[prefix_len:(prefix_len + mask_len)]
-            # print(f"real length of document: {len(document)}")
-            # print(f"prefix_len+mask_len: {prefix_len + mask_len}")
             suffix = document[(prefix_len + mask_len):]
         # prepare masked string
             pad_len = self.block_size - truncate_len - 2
-        # print(f"mask len: {mask_len}")
-        # print(f"block_size: {self.block_size}")
-        # print(f"pad_len: {pad_len}")
-        # print(f"truncate_len: {truncate_len}")
-        # print(f"prefix_len: {prefix_len}")
-        # print(f"real prefix length: {len(prefix)}")
-        # print(f"real suffix length: {len(suffix)}")
-        # print(f"real masked content length: {len(masked_content)}")
             pads = self.PAD_CHAR * pad_len
             masked_string = prefix + self.MASK_CHAR + suffix + self.MASK_CHAR + masked_content + pads
-        # print(f"real len of masked string: {len(masked_string)}")
         # constuct input and output
             input = masked_string[:-1]
             output = masked_string[1:]
